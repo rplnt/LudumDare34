@@ -6,58 +6,46 @@ public class SnakeHead : MonoBehaviour {
     public float rotationAmount;
     public float speed;
 
-    public bool paused = true;
+    public float initialTrailTime;
+
+    bool paused = true;
     bool gameOver = false;
 
-    public GameObject link;
-    public GameObject bodyParent;
+    int points = 0;
 
-    SnakeMover snake;
+    public GameObject bodyParent;
+    public GameObject global;
+
+    Spawner spawner;
+
+    TrailRenderer tr;
+
+    Vector2[] runAround = new Vector2[4];
+
+    float collSpawnDelay;
+    float lastSpawn = 0.0f;
+
+
+    void Awake() {
+        tr = gameObject.GetComponent<TrailRenderer>();
+        spawner = global.GetComponent<Spawner>();
+        collSpawnDelay = 0.3f / speed;
+    }
 
 
     void Start() {
-        snake = new SnakeMover(gameObject, speed);
-
-        for (int i = 0; i < 10; i++) {
-            snake.ExtendTail(AddPart());
-        }
+        tr.time = initialTrailTime;
+        TogglePause();
     }
 
 
-    GameObject AddPart() {
-        GameObject newTail = Instantiate(link);
-        newTail.transform.position = snake.Tail.transform.position + snake.Tail.transform.up * -0.15f;
-        newTail.transform.SetParent(bodyParent.transform);
-        newTail.GetComponent<SpriteRenderer>().sortingOrder = 500 - snake.Length;
-        newTail.name = "Unit " + (snake.Length);
-
-        StartCoroutine(GrowTail(newTail.transform, 0.75f, true));
-        if (snake.Length > 1) {
-            StartCoroutine(GrowTail(snake.Tail.transform, 1.0f, false));
-        }
-
-        return newTail;
+    public void TogglePause() {
+        paused = !paused;
     }
 
 
-    IEnumerator GrowTail(Transform tail, float target, bool fromZero = true, float duration = 0.8f) {
-        float elapsed = 0.0f;
-        if (fromZero) {
-            tail.localScale = Vector2.zero;
-        }
-        Vector2 targetVector = new Vector2(target, target);
-
-        while (elapsed < duration) {
-            elapsed += Time.deltaTime;
-
-            tail.localScale = Vector2.Lerp(tail.localScale, targetVector, elapsed / duration);
-
-            yield return null;
-        }
-
-        transform.localScale = targetVector;
+    void ExtendSnake() {
     }
-
 
     public void RotateLeft() {
         Rotate(rotationAmount);
@@ -81,13 +69,9 @@ public class SnakeHead : MonoBehaviour {
 
     void Update() {
         if (paused || gameOver) return;
-
         
-
-        Debug.DrawLine(transform.position, transform.position + transform.up);
         transform.position = transform.position + (transform.up * Time.deltaTime * speed);
-        snake.UpdateBody();
-        
+
     }
 
 
@@ -105,8 +89,34 @@ public class SnakeHead : MonoBehaviour {
 
 
     void Eat(GameObject edible) {
-        snake.ExtendTail(AddPart());
-        Destroy(edible);
+        edible.SetActive(false);
+        StartCoroutine(ProlongTrail(0.5f, 1.0f));
+        spawner.Respawn();
+        points++;
+    }
+
+
+    IEnumerator ProlongTrail(float amount, float time) {
+        float elapsed = 0.0f;
+        float initial = tr.time;
+
+        while (elapsed < time) {
+            elapsed += Time.deltaTime;
+
+            tr.time = Mathf.Lerp(initial, initial + amount, elapsed / time);
+
+            yield return null;
+        }
+
+        tr.time = initial + amount;
+    }
+
+
+    void FixedUpdate() {
+        if (Time.time - lastSpawn > collSpawnDelay) {
+            spawner.SpawnCollider(transform.position, collSpawnDelay, tr.time * 0.85f);
+            lastSpawn = Time.time;
+        }
     }
 
 }

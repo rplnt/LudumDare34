@@ -20,7 +20,7 @@ public class InputController : MonoBehaviour {
         } else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.L)) {
             head.RotateRight();
         } else if (Input.GetKey(KeyCode.P)) {
-            head.paused = false;
+            head.TogglePause();
         }
 	}
 }
