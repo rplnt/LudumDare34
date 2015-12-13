@@ -5,9 +5,14 @@ public class InputController : MonoBehaviour {
 
     public GameObject head_go;
     SnakeHead head;
+    AudioManager am;
 
     void Awake() {
         head = head_go.GetComponent<SnakeHead>();
+    }
+
+    void Start() {
+        am = AudioManager.GetInstance();
     }
 	
     void Update() {
@@ -24,10 +29,14 @@ public class InputController : MonoBehaviour {
             head.RotateLeft();
         } else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.L)) {
             head.RotateRight();
-        } else if (Input.GetKeyDown(KeyCode.P)) {
-            //head.TogglePause();
+        } else if (Input.GetKeyDown(KeyCode.M)) {
+            am.ToggleMute();
         } else if (Input.GetKeyDown(KeyCode.Space)) {
             head.TogglePause(false);
         }
 	}
+
+    public void OpenTwitter() {
+        Application.OpenURL("https://twitter.com/rplnt");
+    }
 }

@@ -53,7 +53,7 @@ public class SnakeHead : MonoBehaviour {
         tr.enabled = true;
         sr.enabled = true;
         score = 0;
-        transform.position = new Vector2(0.0f, -4.0f);
+        transform.position = new Vector2(0.0f, -3.5f);
         transform.rotation = Quaternion.identity;
         gameOver = false;
         best = PlayerPrefs.GetInt("best_score");
@@ -120,8 +120,12 @@ public class SnakeHead : MonoBehaviour {
             if (!warning) {
                 warning = true;
                 outsideTimer = 1.0f;
+                ui.StartTimer(outsideTimer * 60.0f);
             }
             outsideTimer -= Time.deltaTime;
+
+            am.PlaySiren();
+            ui.UpdateTimer(outsideTimer * 60.0f);
 
             if (outsideTimer < 0.0f) {
                 Die();
@@ -129,6 +133,8 @@ public class SnakeHead : MonoBehaviour {
 
         } else if (warning) {
             warning = false;
+            am.StopSiren();
+            ui.StopTimer();
         }
 
         /* spawn colliders */
@@ -167,6 +173,7 @@ public class SnakeHead : MonoBehaviour {
         StartCoroutine(ProlongTrail(0.5f, 1.0f));
         spawner.Respawn();
         score++;
+        ui.UpdateScore(score);
     }
 
 
@@ -180,12 +187,11 @@ public class SnakeHead : MonoBehaviour {
             ss.CameraShake();
         }
 
+        ui.ShowGameOver(score, best);
         if (score > best) {
             PlayerPrefs.SetInt("best_score", score);
         }
         am.PlayExplosion();
-
-        ui.ShowGameOver();
 
         Invoke("Reset", 2.0f);
     }

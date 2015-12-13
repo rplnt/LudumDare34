@@ -10,6 +10,10 @@ public class AudioManager : MonoBehaviour {
     public AudioClip siren;
 
     public bool paused;
+    public bool muted;
+
+    float sirenTimer;
+    bool sirenEnabled = false;
 
 
     void Start() {
@@ -41,9 +45,36 @@ public class AudioManager : MonoBehaviour {
         PlaySound(explosion);
     }
 
-    void PlaySound(AudioClip sound) {
-        source.pitch = 1.0f + Random.Range(-0.1f, 0.1f);
+    public void PlaySiren() {
+        if (!sirenEnabled) {
+            sirenEnabled = true;
+            sirenTimer = Mathf.Infinity;
+        }
+
+        if (sirenTimer > siren.length + 0.2f) {
+            PlaySound(siren, false);
+            sirenTimer = 0.0f;
+        }
+    }
+
+    public void StopSiren() {
+        sirenEnabled = false;
+    }
+
+    void PlaySound(AudioClip sound, bool changePitch = true) {
+        source.pitch = 1.0f + (changePitch ? Random.Range(-0.1f, 0.1f) : 0.0f);
         source.PlayOneShot(sound);
+    }
+
+    public void ToggleMute() {
+        muted = !muted;
+        source.mute = muted;
+    }
+
+    void Update() {
+        if (sirenEnabled) {
+            sirenTimer += Time.deltaTime;
+        }
     }
 
 }

@@ -24,6 +24,10 @@ public class BackgroundMusic : MonoBehaviour {
 
 
     void Update() {
+        if (am.muted != player.mute) {
+            player.mute = am.muted;
+        }
+
         timer += Time.deltaTime;
 
         if (timer > currentLength) {
