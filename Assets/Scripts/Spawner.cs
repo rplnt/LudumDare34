@@ -9,10 +9,16 @@ public class Spawner : MonoBehaviour {
     public GameObject bodyColliderPrefab;
 
     List<GameObject> colliderPool;
+    List<GameObject> activeColliders;
 
     GameObject env;
 
     Vector2 pos;
+
+    public Transform PICIKOKOTKURVA() {
+        return item.transform;
+    }
+ 
 
 
     void Awake() {
@@ -27,6 +33,7 @@ public class Spawner : MonoBehaviour {
         item = Instantiate(itemPrefab);
         item.transform.position = Vector2.zero;
         colliderPool = new List<GameObject>();
+        activeColliders = new List<GameObject>();
     }
 
 
@@ -50,6 +57,7 @@ public class Spawner : MonoBehaviour {
         if (colliderPool.Count > 0) {
             coll = colliderPool[colliderPool.Count - 1];
             colliderPool.RemoveAt(colliderPool.Count - 1);
+            activeColliders.Add(coll);
         } else {
             coll = Instantiate(bodyColliderPrefab);
             coll.transform.parent = env.transform;
@@ -72,7 +80,20 @@ public class Spawner : MonoBehaviour {
     IEnumerator DestroyAfter(GameObject go, float delay) {
         yield return new WaitForSeconds(delay);
         go.SetActive(false);
+        activeColliders.Remove(go);
         colliderPool.Add(go);
+    }
+
+
+    public void ExplodeColliders() {
+        foreach (GameObject go in activeColliders) {
+            ParticleSystem ps = go.GetComponent<ParticleSystem>();
+            if (!ps.isPlaying) {
+                ps.Play();
+            }
+            
+            StartCoroutine(DestroyAfter(go, 1.8f));
+        }
     }
 
 }

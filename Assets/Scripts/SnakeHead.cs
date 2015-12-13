@@ -11,7 +11,8 @@ public class SnakeHead : MonoBehaviour {
     bool paused = true;
     bool gameOver = false;
 
-    int points = 0;
+    int score = 0;
+    int best = 0;
 
     public GameObject bodyParent;
     public GameObject global;
@@ -19,23 +20,39 @@ public class SnakeHead : MonoBehaviour {
     Spawner spawner;
 
     TrailRenderer tr;
-
-    Vector2[] runAround = new Vector2[4];
+    SpriteRenderer sr;
 
     float collSpawnDelay;
     float lastSpawn = 0.0f;
 
+    AudioManager am;
+
 
     void Awake() {
         tr = gameObject.GetComponent<TrailRenderer>();
+        sr = gameObject.GetComponent<SpriteRenderer>();
         spawner = global.GetComponent<Spawner>();
         collSpawnDelay = 0.3f / speed;
+        am = AudioManager.GetInstance();
+
+        best = PlayerPrefs.GetInt("best_score");
     }
 
 
     void Start() {
         tr.time = initialTrailTime;
-        TogglePause();
+    }
+
+
+    void Reset() {
+        tr.time = initialTrailTime;
+        tr.enabled = true;
+        sr.enabled = true;
+        score = 0;
+        transform.position = new Vector2(0.0f, -4.0f);
+        transform.rotation = Quaternion.identity;
+        gameOver = false;
+        paused = true;
     }
 
 
@@ -57,8 +74,14 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
-    public void RotateTowards(Vector2 pos) {
-        throw new System.NotImplementedException();
+    public void RotateTowards(Vector3 pos) {
+        if (paused) return;
+        Debug.DrawRay(transform.position, transform.up);
+        Debug.DrawRay(transform.position, pos - gameObject.transform.position);
+        Vector2 direction = (pos - gameObject.transform.position);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
+        Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationAmount);
     }
 
 
@@ -78,7 +101,7 @@ public class SnakeHead : MonoBehaviour {
     void OnTriggerEnter2D(Collider2D coll) {
         switch (coll.gameObject.tag) {
             case "body":
-                gameOver = true;
+                Die();
                 break;
 
             case "edible":
@@ -87,12 +110,36 @@ public class SnakeHead : MonoBehaviour {
         }
     }
 
+    void DisableTrail() {
+        tr.enabled = false;
+    }
+
 
     void Eat(GameObject edible) {
+        am.PlayToink();
         edible.SetActive(false);
         StartCoroutine(ProlongTrail(0.5f, 1.0f));
         spawner.Respawn();
-        points++;
+        score++;
+    }
+
+
+    void Die() {
+        spawner.ExplodeColliders();
+        Invoke("DisableTrail", 0.1f);
+        gameOver = true;
+        sr.enabled = false;
+        ScreenShake ss = Camera.main.GetComponent<ScreenShake>();
+        if (ss != null) {
+            ss.CameraShake();
+        }
+
+        if (score > best) {
+            PlayerPrefs.SetInt("best_score", score);
+        }
+        am.PlayExplosion();
+
+        Invoke("Reset", 2.0f);
     }
 
 
@@ -113,6 +160,8 @@ public class SnakeHead : MonoBehaviour {
 
 
     void FixedUpdate() {
+        if (paused || gameOver) return;
+
         if (Time.time - lastSpawn > collSpawnDelay) {
             spawner.SpawnCollider(transform.position, collSpawnDelay, tr.time * 0.85f);
             lastSpawn = Time.time;
