@@ -7,27 +7,26 @@ public class InputController : MonoBehaviour {
     SnakeHead head;
     AudioManager am;
 
+
     void Awake() {
         head = head_go.GetComponent<SnakeHead>();
     }
+
 
     void Start() {
         am = AudioManager.GetInstance();
     }
 	
-    void Update() {
-        if (Input.touchCount > 0) {
-            // pass
-        }
 
+    void Update() {
         //if (Input.GetMouseButton(0)) {
         //    Vector3 click = Camera.main.ScreenToWorldPoint(Input.mousePosition);
         //    head.RotateTowards(click);
         //}
 
-        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.H)) {
+        if (Input.GetKey(KeyCode.LeftArrow) || Input.GetKey(KeyCode.A) || Input.GetKey(KeyCode.H) || Input.GetKey(KeyCode.Keypad4)) {
             head.RotateLeft();
-        } else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.L)) {
+        } else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.L) || Input.GetKey(KeyCode.Keypad6)) {
             head.RotateRight();
         } else if (Input.GetKeyDown(KeyCode.M)) {
             am.ToggleMute();
@@ -36,7 +35,10 @@ public class InputController : MonoBehaviour {
         }
 	}
 
+
     public void OpenTwitter() {
+#if UNITY_STANDALONE
         Application.OpenURL("https://twitter.com/rplnt");
+#endif
     }
 }

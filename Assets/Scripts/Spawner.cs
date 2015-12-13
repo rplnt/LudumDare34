@@ -13,7 +13,10 @@ public class Spawner : MonoBehaviour {
 
     GameObject env;
 
-    Vector2 pos;
+    Vector2 vMin, vMax;
+    float buffer = 0.5f;
+
+    public bool forceClean;
 
     public Transform PICIKOKOTKURVA() {
         return item.transform;
@@ -34,11 +37,21 @@ public class Spawner : MonoBehaviour {
         item.transform.position = Vector2.zero;
         colliderPool = new List<GameObject>();
         activeColliders = new List<GameObject>();
+        vMin = Camera.main.ScreenToWorldPoint(Vector2.zero);
+        vMax = Camera.main.ScreenToWorldPoint(new Vector2(Camera.main.pixelWidth, Camera.main.pixelHeight));
     }
 
 
     Vector2 GetFreePosition() {
-        return new Vector2(Random.Range(-3f, 3f), Random.Range(-3f, 3f));
+        Vector2 candidate = Vector2.zero;
+        for (int i = 0; i < 5; i++) {
+            candidate = new Vector2(Random.Range(vMin.x + buffer, vMax.x - buffer), Random.Range(vMin.y + buffer, vMax.y - buffer));
+
+            if (Physics2D.OverlapCircle(candidate, 1.0f) == null) break;
+
+        }
+
+        return candidate;
     }
 
 
@@ -74,7 +87,9 @@ public class Spawner : MonoBehaviour {
 
     IEnumerator EnableAfter(GameObject go, float delay) {
         yield return new WaitForSeconds(delay);
-        go.SetActive(true);        
+        go.SetActive(true);
+        BoxCollider2D collider = go.GetComponent<BoxCollider2D>();
+        collider.enabled = true;
     }
 
 
@@ -83,8 +98,11 @@ public class Spawner : MonoBehaviour {
 
         if (go == null) yield break;
 
+        BoxCollider2D collider = go.GetComponent<BoxCollider2D>();
+        collider.enabled = false;
+
         go.SetActive(false);
-        //go.transform.position = new Vector2(-30.0f, -30.0f);
+        go.transform.position = new Vector2(-30.0f, -30.0f);
 
         if (activeColliders.Remove(go)) {
             colliderPool.Add(go);
@@ -94,6 +112,12 @@ public class Spawner : MonoBehaviour {
 
     void CleanColliders() {
         foreach (GameObject go in activeColliders) {
+            if (forceClean) {
+                Destroy(go);
+                continue;
+            }
+            
+            go.transform.position = new Vector2(-30.0f, -30.0f);
             if (colliderPool.Remove(go)) {
                 Debug.LogError("Duplicity " + go.name);
             }
@@ -103,7 +127,14 @@ public class Spawner : MonoBehaviour {
         activeColliders.Clear();
 
         foreach (GameObject go in colliderPool) {
+            if (forceClean) {
+                Destroy(go);
+            }
             go.SetActive(false);
+        }
+
+        if (forceClean) {
+            colliderPool.Clear();
         }
     }
 
@@ -114,6 +145,8 @@ public class Spawner : MonoBehaviour {
             if (!ps.isPlaying) {
                 ps.Play();
             }
+            BoxCollider2D collider = go.GetComponent<BoxCollider2D>();
+            collider.enabled = false;
         }
 
         Invoke("CleanColliders", 2.0f);

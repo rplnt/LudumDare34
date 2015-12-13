@@ -22,6 +22,7 @@ public class SnakeHead : MonoBehaviour {
     TrailRenderer tr;
     SpriteRenderer sr;
     UIManager ui;
+    PulseBorders pb;
 
     Vector3 screenPosition;
     bool warning = false;
@@ -37,6 +38,7 @@ public class SnakeHead : MonoBehaviour {
         tr = gameObject.GetComponent<TrailRenderer>();
         sr = gameObject.GetComponent<SpriteRenderer>();
         ui = global.GetComponent<UIManager>();
+        pb = Camera.main.gameObject.GetComponent<PulseBorders>();
         spawner = global.GetComponent<Spawner>();
         collSpawnDelay = 0.3f / speed;
     }
@@ -57,6 +59,7 @@ public class SnakeHead : MonoBehaviour {
         transform.rotation = Quaternion.identity;
         gameOver = false;
         best = PlayerPrefs.GetInt("best_score");
+        pb.StopPulser();
         TogglePause(true);
     }
 
@@ -67,6 +70,7 @@ public class SnakeHead : MonoBehaviour {
         am.paused = paused;
     }
 
+
     public void TogglePause(bool status) {
         if (gameOver) return;
         if (!status) {
@@ -76,9 +80,6 @@ public class SnakeHead : MonoBehaviour {
         am.paused = status;
     }
 
-
-    void ExtendSnake() {
-    }
 
     public void RotateLeft() {
         Rotate(rotationAmount);
@@ -121,6 +122,7 @@ public class SnakeHead : MonoBehaviour {
                 warning = true;
                 outsideTimer = 1.0f;
                 ui.StartTimer(outsideTimer * 60.0f);
+                pb.StartPulser();
             }
             outsideTimer -= Time.deltaTime;
 
@@ -135,6 +137,7 @@ public class SnakeHead : MonoBehaviour {
             warning = false;
             am.StopSiren();
             ui.StopTimer();
+            pb.StopPulser();
         }
 
         /* spawn colliders */
@@ -191,7 +194,9 @@ public class SnakeHead : MonoBehaviour {
         if (score > best) {
             PlayerPrefs.SetInt("best_score", score);
         }
+
         am.PlayExplosion();
+        pb.StartPulser();
 
         Invoke("Reset", 2.0f);
     }
