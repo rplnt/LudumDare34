@@ -6,6 +6,8 @@ public class BackgroundMusic : MonoBehaviour {
     AudioSource player;
     public List<AudioClip> playlist;
     AudioClip current;
+    float currentLength;
+    AudioManager am;
 
     float timer;
 
@@ -15,20 +17,29 @@ public class BackgroundMusic : MonoBehaviour {
         
 
     void Start() {
-        ChangeTrack();
+        am = AudioManager.GetInstance();
+        timer = 0.0f;
+        currentLength = 0.0f;
     }
+
 
     void Update() {
         timer += Time.deltaTime;
 
-        if (timer > current.length) {
+        if (timer > currentLength) {
             ChangeTrack();
         }
     }
 
+
     void ChangeTrack() {
         player.Stop();
-        current = playlist[Random.Range(0, playlist.Count - 1)];
+        if (am.paused) {
+            current = playlist[0];
+        } else {
+            current = playlist[Random.Range(1, playlist.Count - 1)];
+        }
+        currentLength = current.length;
         player.clip = current;
         timer = 0;
         player.Play();

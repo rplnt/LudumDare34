@@ -21,6 +21,11 @@ public class SnakeHead : MonoBehaviour {
 
     TrailRenderer tr;
     SpriteRenderer sr;
+    UIManager ui;
+
+    Vector3 screenPosition;
+    bool warning = false;
+    float outsideTimer = 3.0f;
 
     float collSpawnDelay;
     float lastSpawn = 0.0f;
@@ -31,16 +36,15 @@ public class SnakeHead : MonoBehaviour {
     void Awake() {
         tr = gameObject.GetComponent<TrailRenderer>();
         sr = gameObject.GetComponent<SpriteRenderer>();
+        ui = global.GetComponent<UIManager>();
         spawner = global.GetComponent<Spawner>();
         collSpawnDelay = 0.3f / speed;
-        am = AudioManager.GetInstance();
-
-        best = PlayerPrefs.GetInt("best_score");
     }
 
 
     void Start() {
-        tr.time = initialTrailTime;
+        am = AudioManager.GetInstance();
+        Reset();
     }
 
 
@@ -52,12 +56,24 @@ public class SnakeHead : MonoBehaviour {
         transform.position = new Vector2(0.0f, -4.0f);
         transform.rotation = Quaternion.identity;
         gameOver = false;
-        paused = true;
+        best = PlayerPrefs.GetInt("best_score");
+        TogglePause(true);
     }
 
 
     public void TogglePause() {
+        if (gameOver) return;
         paused = !paused;
+        am.paused = paused;
+    }
+
+    public void TogglePause(bool status) {
+        if (gameOver) return;
+        if (!status) {
+            ui.DisableMenus();
+        }
+        paused = status;
+        am.paused = status;
     }
 
 
@@ -75,7 +91,7 @@ public class SnakeHead : MonoBehaviour {
 
 
     public void RotateTowards(Vector3 pos) {
-        if (paused) return;
+        if (paused || gameOver) return;
         Debug.DrawRay(transform.position, transform.up);
         Debug.DrawRay(transform.position, pos - gameObject.transform.position);
         Vector2 direction = (pos - gameObject.transform.position);
@@ -86,6 +102,7 @@ public class SnakeHead : MonoBehaviour {
 
 
     void Rotate(float rotation) {
+        if (paused || gameOver) return;
         transform.Rotate(0.0f, 0.0f, rotation * Time.deltaTime);
     }
 
@@ -93,14 +110,43 @@ public class SnakeHead : MonoBehaviour {
     void Update() {
         if (paused || gameOver) return;
         
+        /* move */
         transform.position = transform.position + (transform.up * Time.deltaTime * speed);
 
+
+        /* test outside borders */
+        screenPosition = Camera.main.WorldToScreenPoint(transform.position);
+        if (screenPosition.x < 0 || screenPosition.y < 0 || screenPosition.x > Camera.main.pixelWidth || screenPosition.y > Camera.main.pixelHeight) {
+            if (!warning) {
+                warning = true;
+                outsideTimer = 1.0f;
+            }
+            outsideTimer -= Time.deltaTime;
+
+            if (outsideTimer < 0.0f) {
+                Die();
+            }
+
+        } else if (warning) {
+            warning = false;
+        }
+
+        /* spawn colliders */
+        lastSpawn += Time.deltaTime;
+        if (lastSpawn > collSpawnDelay) {
+            spawner.SpawnCollider(transform.position, collSpawnDelay, tr.time * 0.85f);
+            lastSpawn = 0.0f;
+        }
     }
 
 
     void OnTriggerEnter2D(Collider2D coll) {
         switch (coll.gameObject.tag) {
             case "body":
+                if (gameOver) {
+                    break;
+                }
+                //Debug.Break();
                 Die();
                 break;
 
@@ -139,6 +185,8 @@ public class SnakeHead : MonoBehaviour {
         }
         am.PlayExplosion();
 
+        ui.ShowGameOver();
+
         Invoke("Reset", 2.0f);
     }
 
@@ -156,16 +204,6 @@ public class SnakeHead : MonoBehaviour {
         }
 
         tr.time = initial + amount;
-    }
-
-
-    void FixedUpdate() {
-        if (paused || gameOver) return;
-
-        if (Time.time - lastSpawn > collSpawnDelay) {
-            spawner.SpawnCollider(transform.position, collSpawnDelay, tr.time * 0.85f);
-            lastSpawn = Time.time;
-        }
     }
 
 }

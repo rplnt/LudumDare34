@@ -7,9 +7,13 @@ public class AudioManager : MonoBehaviour {
 
     public AudioClip toink;
     public AudioClip explosion;
+    public AudioClip siren;
+
+    public bool paused;
 
 
     void Start() {
+        paused = true;
         source = GetComponent<AudioSource>();
     }
 

@@ -4,13 +4,21 @@ using System.Collections;
 
 public class UIManager : MonoBehaviour {
 
-    GameObject intro;
+    public GameObject intro;
+    public GameObject over;
 
     void Awake() {
-        intro = GameObject.Find("Intro");
+        //intro = GameObject.Find("Intro");
+        //over = GameObject.Find("Game Over");
     }
 
-    public void DisableIntro() {
+    public void DisableMenus() {
         intro.SetActive(false);
+        over.SetActive(false);
+    }
+
+
+    public void ShowGameOver() {
+        over.SetActive(true);
     }
 }

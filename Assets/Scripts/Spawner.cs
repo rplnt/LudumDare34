@@ -57,17 +57,18 @@ public class Spawner : MonoBehaviour {
         if (colliderPool.Count > 0) {
             coll = colliderPool[colliderPool.Count - 1];
             colliderPool.RemoveAt(colliderPool.Count - 1);
-            activeColliders.Add(coll);
         } else {
             coll = Instantiate(bodyColliderPrefab);
             coll.transform.parent = env.transform;
+            coll.name = "collider_" + activeColliders.Count;
         }
 
-        coll.transform.position = pos;
+        activeColliders.Add(coll);
         coll.SetActive(false);
+        coll.transform.position = pos;
 
         StartCoroutine(EnableAfter(coll, delay));
-        StartCoroutine(DestroyAfter(coll, lifetime));
+        StartCoroutine(RecycleAfter(coll, lifetime));
     }
 
 
@@ -77,11 +78,33 @@ public class Spawner : MonoBehaviour {
     }
 
 
-    IEnumerator DestroyAfter(GameObject go, float delay) {
+    IEnumerator RecycleAfter(GameObject go, float delay) {
         yield return new WaitForSeconds(delay);
+
+        if (go == null) yield break;
+
         go.SetActive(false);
-        activeColliders.Remove(go);
-        colliderPool.Add(go);
+        //go.transform.position = new Vector2(-30.0f, -30.0f);
+
+        if (activeColliders.Remove(go)) {
+            colliderPool.Add(go);
+        }
+    }
+
+
+    void CleanColliders() {
+        foreach (GameObject go in activeColliders) {
+            if (colliderPool.Remove(go)) {
+                Debug.LogError("Duplicity " + go.name);
+            }
+            colliderPool.Add(go);
+        }
+
+        activeColliders.Clear();
+
+        foreach (GameObject go in colliderPool) {
+            go.SetActive(false);
+        }
     }
 
 
@@ -91,9 +114,10 @@ public class Spawner : MonoBehaviour {
             if (!ps.isPlaying) {
                 ps.Play();
             }
-            
-            StartCoroutine(DestroyAfter(go, 1.8f));
         }
+
+        Invoke("CleanColliders", 2.0f);
+
     }
 
 }

@@ -25,7 +25,9 @@ public class InputController : MonoBehaviour {
         } else if (Input.GetKey(KeyCode.RightArrow) || Input.GetKey(KeyCode.D) || Input.GetKey(KeyCode.L)) {
             head.RotateRight();
         } else if (Input.GetKeyDown(KeyCode.P)) {
-            head.TogglePause();
+            //head.TogglePause();
+        } else if (Input.GetKeyDown(KeyCode.Space)) {
+            head.TogglePause(false);
         }
 	}
 }
