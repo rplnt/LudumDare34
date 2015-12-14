@@ -3,9 +3,10 @@ using System.Collections;
 
 public class SnakeHead : MonoBehaviour {
 
-    public float rotationAmount;
+    public float defaultRotationAmount;
     public float defaultSpeed;
     float speed;
+    float rotationAmount;
 
     public float initialTrailTime;
 
@@ -65,7 +66,8 @@ public class SnakeHead : MonoBehaviour {
         ResetPosition();
         tr.time = initialTrailTime;
         tr.enabled = true;
-        speed = defaultSpeed + (mode==Mode.INSANE?1.0f:0.0f);
+        speed = defaultSpeed + (mode == Mode.INSANE ? 1.0f : 0.0f);
+        rotationAmount = defaultRotationAmount + (mode == Mode.INSANE ? 10.0f : 0.0f);
         ui.DisableMenus();        
         gameOver = false;
         score = 0;
@@ -235,6 +237,8 @@ public class SnakeHead : MonoBehaviour {
         if (mode == Mode.INSANE) {
             speed += 0.25f;
             collSpawnDelay = 0.3f / speed;
+            rotationAmount += 3.5f;
+
         }
     }
 
