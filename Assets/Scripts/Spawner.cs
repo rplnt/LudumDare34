@@ -55,8 +55,13 @@ public class Spawner : MonoBehaviour {
     }
 
 
-    public void Respawn() {
-        item.transform.position = GetFreePosition();
+    public void Respawn(bool reset = false) {
+        if (reset) {
+            item.transform.position = Vector2.zero;
+        } else {
+            item.transform.position = GetFreePosition();
+        }
+
         item.SetActive(true);
     }
 

@@ -46,7 +46,6 @@ public class SnakeHead : MonoBehaviour {
         ui = global.GetComponent<UIManager>();
         pb = Camera.main.gameObject.GetComponent<PulseBorders>();
         spawner = global.GetComponent<Spawner>();
-        collSpawnDelay = 0.3f / defaultSpeed;
     }
 
 
@@ -72,6 +71,7 @@ public class SnakeHead : MonoBehaviour {
         score = 0;
         best = PlayerPrefs.GetInt(ScoreKey);
         pb.StopPulser();
+        collSpawnDelay = 0.3f / defaultSpeed;
     }
 
 
@@ -89,6 +89,7 @@ public class SnakeHead : MonoBehaviour {
         gameOver = false;
         TogglePause(true);
         ui.ShowMenu();
+        spawner.Respawn(true);
     }
 
 
