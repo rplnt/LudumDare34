@@ -25,6 +25,7 @@ public class UIManager : MonoBehaviour {
 
     public void ShowMenu() {
         DisableMenus();
+        scoreboard.SetActive(false);
         intro.SetActive(true);
     }
 

@@ -71,6 +71,7 @@ public class SnakeHead : MonoBehaviour {
         ui.DisableMenus();        
         gameOver = false;
         score = 0;
+        ui.UpdateScore(0);
         best = PlayerPrefs.GetInt(ScoreKey);
         pb.StopPulser();
         collSpawnDelay = 0.3f / defaultSpeed;
