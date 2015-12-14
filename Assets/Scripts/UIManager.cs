@@ -23,6 +23,12 @@ public class UIManager : MonoBehaviour {
     }
 
 
+    public void ShowMenu() {
+        DisableMenus();
+        intro.SetActive(true);
+    }
+
+
     public void ShowGameOver(int score, int best) {
         Text text = over.GetComponent<Text>();
         text.color = new Color(1, 1, 1, 0.0f);
@@ -50,11 +56,11 @@ public class UIManager : MonoBehaviour {
             switch (child.name) {
                 case "new_record":
                     Text record = child.GetComponent<Text>();
-                    if (!(score > best)) {
-                        record.text = "Best score: " + best;
-                    } else {
+                    if ((score > best) || best == 0) {
                         record.text = "NEW RECORD!";
-                        StartCoroutine(FlickerText(record, 0.8f));
+                        StartCoroutine(FlickerText(record, 0.8f));                        
+                    } else {
+                        record.text = "Best score: " + best;
                     }
                     break;
 

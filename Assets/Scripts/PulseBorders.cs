@@ -38,14 +38,14 @@ public class PulseBorders : MonoBehaviour {
 
         if (!pulsing) {
             if (so.intensity > 0.0f) {
-                so.intensity -= diff * Time.deltaTime * 2.0f;
+                so.intensity -= diff * Time.deltaTime * 3.0f;
             }
             return;
         }
 
 
         if (up && so.intensity < 1.3f) {
-            so.intensity += diff * Time.deltaTime * (so.intensity < 0.8f ? 2.0f : 1.0f);
+            so.intensity += diff * Time.deltaTime * (so.intensity < 0.8f ? 2.5f : 1.0f);
         } else if (up) {
             up = false;
         } else if (!up && so.intensity > 0.8f) {

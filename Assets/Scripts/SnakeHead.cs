@@ -4,13 +4,15 @@ using System.Collections;
 public class SnakeHead : MonoBehaviour {
 
     public float rotationAmount;
-    public float speed;
+    public float defaultSpeed;
+    float speed;
 
     public float initialTrailTime;
 
     bool paused = true;
     bool gameOver = false;
 
+    Mode mode;
     int score = 0;
     int best = 0;
 
@@ -19,6 +21,7 @@ public class SnakeHead : MonoBehaviour {
 
     Spawner spawner;
 
+    AudioManager am;
     TrailRenderer tr;
     SpriteRenderer sr;
     UIManager ui;
@@ -31,7 +34,10 @@ public class SnakeHead : MonoBehaviour {
     float collSpawnDelay;
     float lastSpawn = 0.0f;
 
-    AudioManager am;
+
+    public enum Mode {
+        CLASSIC, INSANE
+    };
 
 
     void Awake() {
@@ -40,27 +46,72 @@ public class SnakeHead : MonoBehaviour {
         ui = global.GetComponent<UIManager>();
         pb = Camera.main.gameObject.GetComponent<PulseBorders>();
         spawner = global.GetComponent<Spawner>();
-        collSpawnDelay = 0.3f / speed;
+        collSpawnDelay = 0.3f / defaultSpeed;
     }
 
 
     void Start() {
         am = AudioManager.GetInstance();
-        Reset();
+        ui.ShowMenu();
     }
 
 
+    string ScoreKey {
+        get {
+            return "BEST_" + System.Enum.GetName(typeof(Mode), mode);
+        }
+    }
+
     void Reset() {
+        ResetPosition();
         tr.time = initialTrailTime;
         tr.enabled = true;
-        sr.enabled = true;
+        speed = defaultSpeed + (mode==Mode.INSANE?1.0f:0.0f);
+        ui.DisableMenus();        
+        gameOver = false;
         score = 0;
+        best = PlayerPrefs.GetInt(ScoreKey);
+        pb.StopPulser();
+    }
+
+
+    void ResetPosition() {
         transform.position = new Vector2(0.0f, -3.5f);
         transform.rotation = Quaternion.identity;
-        gameOver = false;
-        best = PlayerPrefs.GetInt("best_score");
+        sr.enabled = true;
+    }
+
+
+    public void Escape() {
+        if (!gameOver) return;
+        ResetPosition();
         pb.StopPulser();
+        gameOver = false;
         TogglePause(true);
+        ui.ShowMenu();
+    }
+
+
+    public IEnumerator StartGameFromMenu(int mode) {
+
+        yield return new WaitForSeconds(0.1f);
+        
+        if (paused && !gameOver) {
+            StartGame(mode);
+        }
+    }
+
+
+    public void StartGame() {
+        if (!gameOver) return;
+        StartGame((int)mode);
+    }
+
+
+    public void StartGame(int modeCode) {
+        this.mode = (Mode)modeCode;
+        Reset();
+        TogglePause(false);
     }
 
 
@@ -81,6 +132,7 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
+
     public void RotateLeft() {
         Rotate(rotationAmount);
     }
@@ -91,21 +143,22 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
-    public void RotateTowards(Vector3 pos) {
-        if (paused || gameOver) return;
-        Debug.DrawRay(transform.position, transform.up);
-        Debug.DrawRay(transform.position, pos - gameObject.transform.position);
-        Vector2 direction = (pos - gameObject.transform.position);
-        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
-        Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-        transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationAmount);
-    }
-
-
     void Rotate(float rotation) {
         if (paused || gameOver) return;
         transform.Rotate(0.0f, 0.0f, rotation * Time.deltaTime);
     }
+
+
+    //public void RotateTowards(Vector3 pos) {
+    //    /* TODO fix */
+    //    if (paused || gameOver) return;
+    //    Debug.DrawRay(transform.position, transform.up);
+    //    Debug.DrawRay(transform.position, pos - gameObject.transform.position);
+    //    Vector2 direction = (pos - gameObject.transform.position);
+    //    float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
+    //    Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+    //    transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationAmount);
+    //}
 
 
     void Update() {
@@ -177,6 +230,11 @@ public class SnakeHead : MonoBehaviour {
         spawner.Respawn();
         score++;
         ui.UpdateScore(score);
+
+        if (mode == Mode.INSANE) {
+            speed += 0.25f;
+            collSpawnDelay = 0.3f / speed;
+        }
     }
 
 
@@ -192,13 +250,12 @@ public class SnakeHead : MonoBehaviour {
 
         ui.ShowGameOver(score, best);
         if (score > best) {
-            PlayerPrefs.SetInt("best_score", score);
+            PlayerPrefs.SetInt(ScoreKey, score);
         }
 
         am.PlayExplosion();
+        am.paused = true;
         pb.StartPulser();
-
-        Invoke("Reset", 2.0f);
     }
 
 
