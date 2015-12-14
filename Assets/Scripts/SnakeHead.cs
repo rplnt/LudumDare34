@@ -18,6 +18,7 @@ public class SnakeHead : MonoBehaviour {
 
     public GameObject bodyParent;
     public GameObject global;
+    public GameObject fakeHead;
 
     Spawner spawner;
 
@@ -67,10 +68,10 @@ public class SnakeHead : MonoBehaviour {
         tr.time = initialTrailTime;
         tr.enabled = true;
         speed = defaultSpeed + (mode==Mode.INSANE?1.0f:0.0f);
-        ui.DisableMenus();        
         gameOver = false;
         score = 0;
         best = PlayerPrefs.GetInt(ScoreKey);
+        sr.enabled = true;
         pb.StopPulser();
     }
 
@@ -89,12 +90,35 @@ public class SnakeHead : MonoBehaviour {
         gameOver = false;
         TogglePause(true);
         ui.ShowMenu();
+        spawner.Respawn(true);
+        sr.enabled = false;
+        fakeHead.SetActive(true);
     }
 
 
-    public IEnumerator StartGameFromMenu(int mode) {
+    public void StartGameFromMenu(int mode) {
+        if (!(!gameOver && paused)) return;
+        StartCoroutine(StartGameFromMenuCR(mode));
+    }
 
-        yield return new WaitForSeconds(0.1f);
+
+    public IEnumerator StartGameFromMenuCR(int mode) {
+        float elapsed = 0.0f;
+        float duration = 0.4f;
+        ui.DisableMenus();
+
+        Quaternion cam = Camera.main.gameObject.transform.rotation;
+        Quaternion rot = Quaternion.Euler(0, 90 * (mode == 0 ? -1 : 1), 0);
+
+        while (elapsed < duration) {
+            elapsed += Time.deltaTime;
+            Camera.main.gameObject.transform.rotation = Quaternion.Lerp(cam, cam * rot, elapsed / duration);
+            yield return null;
+        }
+
+        Camera.main.gameObject.transform.rotation = Quaternion.identity;
+        fakeHead.SetActive(false);
+        
         
         if (paused && !gameOver) {
             StartGame(mode);
@@ -208,7 +232,7 @@ public class SnakeHead : MonoBehaviour {
                 if (gameOver) {
                     break;
                 }
-                //Debug.Break();
+
                 Die();
                 break;
 

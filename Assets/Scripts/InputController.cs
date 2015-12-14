@@ -25,9 +25,9 @@ public class InputController : MonoBehaviour {
         //}
 
         if (Input.GetKeyDown(KeyCode.LeftArrow)) {
-            StartCoroutine(head.StartGameFromMenu(0));
+            head.StartGameFromMenu(0);
         } else if (Input.GetKeyDown(KeyCode.RightArrow)) {
-            StartCoroutine(head.StartGameFromMenu(1));
+            head.StartGameFromMenu(1);
         } else if (Input.GetKeyDown(KeyCode.Escape)) {
             head.Escape();
         }
