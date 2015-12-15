@@ -505,7 +505,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   defaultRotationAmount: 230
-  defaultSpeed: 2.25
+  defaultSpeed: 2.29999995
   initialTrailTime: 0
   bodyParent: {fileID: 0}
   global: {fileID: 555239311}
@@ -1152,6 +1152,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   head_go: {fileID: 78558123}
+  handleMouseAsTouch: 0
 --- !u!4 &555239313
 Transform:
   m_ObjectHideFlags: 0

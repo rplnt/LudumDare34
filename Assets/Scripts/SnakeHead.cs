@@ -62,6 +62,13 @@ public class SnakeHead : MonoBehaviour {
         }
     }
 
+
+    public bool Playing {
+        get {
+            return (!paused && !gameOver);
+        }
+    }
+
     void Reset() {
         ResetPosition();
         tr.time = initialTrailTime;
@@ -153,16 +160,18 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
-    //public void RotateTowards(Vector3 pos) {
-    //    /* TODO fix */
-    //    if (paused || gameOver) return;
-    //    Debug.DrawRay(transform.position, transform.up);
-    //    Debug.DrawRay(transform.position, pos - gameObject.transform.position);
-    //    Vector2 direction = (pos - gameObject.transform.position);
-    //    float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
-    //    Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-    //    transform.rotation = Quaternion.Slerp(transform.rotation, rotation, Time.deltaTime * rotationAmount);
-    //}
+    public void RotateTowards(Vector3 pos) {
+        /* TODO fix */
+        if (paused || gameOver) return;
+        Vector2 direction = (pos - gameObject.transform.position);
+        float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
+        Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
+
+        Debug.Log(Mathf.Abs(rotation.eulerAngles.z - transform.rotation.eulerAngles.z));
+
+
+        transform.rotation  = Quaternion.RotateTowards(transform.rotation, rotation, Time.deltaTime * rotationAmount);
+    }
 
 
     void Update() {
