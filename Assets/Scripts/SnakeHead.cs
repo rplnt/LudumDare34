@@ -143,7 +143,6 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
-
     public void RotateLeft() {
         Rotate(rotationAmount);
     }
@@ -161,14 +160,13 @@ public class SnakeHead : MonoBehaviour {
 
 
     public void RotateTowards(Vector3 pos) {
-        /* TODO fix */
         if (paused || gameOver) return;
-        Vector2 direction = (pos - gameObject.transform.position);
+
+        Vector3 direction = (pos - gameObject.transform.position);
+        if (Vector2.Angle(direction, transform.up) > 120 && !warning) return;
+
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
         Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
-
-        Debug.Log(Mathf.Abs(rotation.eulerAngles.z - transform.rotation.eulerAngles.z));
-
 
         transform.rotation  = Quaternion.RotateTowards(transform.rotation, rotation, Time.deltaTime * rotationAmount);
     }
@@ -179,7 +177,6 @@ public class SnakeHead : MonoBehaviour {
         
         /* move */
         transform.position = transform.position + (transform.up * Time.deltaTime * speed);
-
 
         /* test outside borders */
         screenPosition = Camera.main.WorldToScreenPoint(transform.position);

@@ -7,6 +7,8 @@ public class InputController : MonoBehaviour {
     SnakeHead head;
     AudioManager am;
 
+    public GameObject cursor;
+
     public bool handleMouseAsTouch;
 
 
@@ -20,6 +22,7 @@ public class InputController : MonoBehaviour {
 
     void Start() {
         am = AudioManager.GetInstance();
+        cursor.SetActive(false);
     }
 	
 
@@ -43,13 +46,44 @@ public class InputController : MonoBehaviour {
                 /* touch */
             if (Input.touchCount > 0) {
                 Touch touch = Input.GetTouch(0);
-                Vector3 click = Camera.main.ScreenToWorldPoint(touch.position);
-                head.RotateTowards(click);
+                Vector3 pos = Camera.main.ScreenToWorldPoint(touch.position);
+
+                switch (touch.phase) {
+                    case TouchPhase.Began:
+                        cursor.SetActive(true);
+                        head.RotateTowards(pos);
+                        break;
+                    case TouchPhase.Moved:
+                        if (cursor.activeSelf) {
+                            cursor.transform.position = new Vector2(pos.x, pos.y);
+                        }
+                        break;
+                    case TouchPhase.Ended:
+                        cursor.SetActive(false);
+                        break;
+                    case TouchPhase.Canceled:
+                        cursor.SetActive(false);
+                        break;
+                }
+
+                head.RotateTowards(pos);
 
                 /* mouse as touch */
             } else if (handleMouseAsTouch && Input.GetMouseButton(0)) {
                 Vector3 click = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+
+                if (cursor.activeSelf) {
+                    cursor.transform.position = new Vector2(click.x, click.y);
+                }
+
+                if (Input.GetMouseButtonDown(0)) {
+                    cursor.transform.position = new Vector2(click.x, click.y);
+                    cursor.SetActive(true);
+                }
+                
                 head.RotateTowards(click);
+            } else if (handleMouseAsTouch && Input.GetMouseButtonUp(0)) {
+                cursor.SetActive(false);
 
                 /* mouse */
             } else if (!handleMouseAsTouch && Input.GetMouseButton(0)) {
