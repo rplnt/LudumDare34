@@ -1,6 +1,6 @@
 fileFormatVersion: 2
 guid: 8beb88742c379c84f8e39fd0d288fdcb
-timeCreated: 1450730996
+timeCreated: 1450735183
 licenseType: Free
 TextureImporter:
   fileIDToRecycleName:
@@ -55,36 +55,6 @@ TextureImporter:
   buildTargetSettings: []
   spriteSheet:
     sprites:
-    - name: menu_0
-      rect:
-        serializedVersion: 2
-        x: 8
-        y: 112
-        width: 48
-        height: 7
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-    - name: menu_1
-      rect:
-        serializedVersion: 2
-        x: 8
-        y: 93
-        width: 48
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-    - name: menu_2
-      rect:
-        serializedVersion: 2
-        x: 8
-        y: 73
-        width: 48
-        height: 6
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
     - name: share
       rect:
         serializedVersion: 2
