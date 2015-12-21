@@ -50,9 +50,17 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
+    float CalculateHeadPosition() {
+        int height = Camera.main.pixelHeight;
+
+        return Camera.main.ScreenToWorldPoint(new Vector3(0, (float)height * 0.2f)).y;
+    }
+
+
     void Start() {
         am = AudioManager.GetInstance();
         ui.ShowMenu();
+        ResetPosition();
     }
 
 
@@ -86,7 +94,7 @@ public class SnakeHead : MonoBehaviour {
 
 
     void ResetPosition() {
-        transform.position = new Vector2(0.0f, -3.5f);
+        transform.position = new Vector3(0.0f, CalculateHeadPosition());
         transform.rotation = Quaternion.identity;
         sr.enabled = true;
     }

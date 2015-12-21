@@ -54,6 +54,7 @@ public class UIManager : MonoBehaviour {
         }
 
         foreach (Transform child in over.transform) {
+            bool activate = true;
             switch (child.name) {
                 case "new_record":
                     Text record = child.GetComponent<Text>();
@@ -62,6 +63,12 @@ public class UIManager : MonoBehaviour {
                         StartCoroutine(FlickerText(record, 0.8f));                        
                     } else {
                         record.text = "Best score: " + best;
+                    }
+                    break;
+
+                case "Share":
+                    if (!(score > best) && (best != 0)) {
+                        activate = false;
                     }
                     break;
 
@@ -75,7 +82,7 @@ public class UIManager : MonoBehaviour {
 
             //yield return new WaitForSeconds(0.2f);
 
-            child.gameObject.SetActive(true);
+            child.gameObject.SetActive(activate);
         }
     }
 

@@ -42,6 +42,7 @@ public class AudioManager : MonoBehaviour {
     }
 
     public void PlayExplosion() {
+        source.volume = 1.0f;
         PlaySound(explosion);
     }
 
@@ -49,6 +50,7 @@ public class AudioManager : MonoBehaviour {
         if (!sirenEnabled) {
             sirenEnabled = true;
             sirenTimer = Mathf.Infinity;
+            source.volume = 0.3f;
         }
 
         if (sirenTimer > siren.length + 0.2f) {
@@ -58,6 +60,7 @@ public class AudioManager : MonoBehaviour {
     }
 
     public void StopSiren() {
+        source.volume = 1.0f;
         sirenEnabled = false;
     }
 

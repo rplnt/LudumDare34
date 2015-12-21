@@ -35,7 +35,9 @@ public class RandomStars : MonoBehaviour {
                 go = stars[Random.Range(0, max)];
             }
 
-            go.transform.position = new Vector2(Random.Range(vMin.x, vMax.x), Random.Range(vMin.y, vMax.y));
+            float scale = Random.Range(0.15f, 0.35f);
+            go.transform.localScale = new Vector2(scale, scale);
+            go.transform.position = new Vector3(Random.Range(vMin.x, vMax.x), Random.Range(vMin.y, vMax.y), 20.0f);
         }
     }
 

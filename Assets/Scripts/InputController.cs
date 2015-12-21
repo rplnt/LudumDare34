@@ -24,6 +24,11 @@ public class InputController : MonoBehaviour {
         am = AudioManager.GetInstance();
         cursor.SetActive(false);
     }
+
+
+    public void DelayedStartClassic() {
+        StartCoroutine(head.StartGameFromMenu(0));
+    }
 	
 
     void Update() {
