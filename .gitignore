@@ -32,4 +32,4 @@ Thumbs.db
 
 out/
 Assets/UnityVS/
-Assets/Scripts/ObjectPooling/
+#Assets/Scripts/ObjectPooling/

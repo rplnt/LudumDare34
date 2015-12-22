@@ -5,7 +5,6 @@ public class InputController : MonoBehaviour {
 
     public GameObject head_go;
     SnakeHead head;
-    AudioManager am;
 
     public GameObject cursor;
 
@@ -21,7 +20,6 @@ public class InputController : MonoBehaviour {
 
 
     void Start() {
-        am = AudioManager.GetInstance();
         cursor.SetActive(false);
     }
 
@@ -103,11 +101,14 @@ public class InputController : MonoBehaviour {
                 head.RotateRight();
             }
 
+            if (Input.GetKeyDown(KeyCode.Escape)) {
+                head.Escape();
+            }
         }
 
         /* common */
-        if (Input.GetKeyDown(KeyCode.M)) {
-            am.ToggleMute();
+        if (Input.GetKeyDown(KeyCode.Escape)) {
+            Application.Quit();
         }
 	}
 

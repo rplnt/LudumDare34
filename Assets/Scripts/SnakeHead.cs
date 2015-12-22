@@ -89,7 +89,7 @@ public class SnakeHead : MonoBehaviour {
         ui.UpdateScore(0);
         best = PlayerPrefs.GetInt(ScoreKey);
         pb.StopPulser();
-        collSpawnDelay = 0.3f / defaultSpeed;
+        collSpawnDelay = 0.4f / defaultSpeed;
     }
 
 
@@ -101,13 +101,14 @@ public class SnakeHead : MonoBehaviour {
 
 
     public void Escape() {
-        if (!gameOver) return;
+        //if (!gameOver) return;
         ResetPosition();
         pb.StopPulser();
+        ui.DisableMenus();
         gameOver = false;
         TogglePause(true);
         ui.ShowMenu();
-        spawner.Respawn(true);
+        spawner.RespawnStar(true);
     }
 
 
@@ -167,16 +168,18 @@ public class SnakeHead : MonoBehaviour {
     }
 
 
-    public void RotateTowards(Vector3 pos) {
-        if (paused || gameOver) return;
+    public bool RotateTowards(Vector3 pos) {
+        if (paused || gameOver) return false;
 
         Vector3 direction = (pos - gameObject.transform.position);
-        if (Vector2.Angle(direction, transform.up) > 120 && !warning) return;
+        if (((Vector2)direction).magnitude < 3.5f && Vector2.Angle(direction, transform.up) > 120 && !warning) return false;
 
         float angle = Mathf.Atan2(direction.y, direction.x) * Mathf.Rad2Deg - 90.0f;
         Quaternion rotation = Quaternion.AngleAxis(angle, Vector3.forward);
 
         transform.rotation  = Quaternion.RotateTowards(transform.rotation, rotation, Time.deltaTime * rotationAmount);
+
+        return true;
     }
 
 
@@ -245,7 +248,7 @@ public class SnakeHead : MonoBehaviour {
         am.PlayToink();
         edible.SetActive(false);
         StartCoroutine(ProlongTrail(0.5f, 1.0f));
-        spawner.Respawn();
+        spawner.RespawnStar();
         score++;
         ui.UpdateScore(score);
 

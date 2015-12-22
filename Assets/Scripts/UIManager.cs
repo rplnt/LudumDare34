@@ -20,6 +20,7 @@ public class UIManager : MonoBehaviour {
         intro.SetActive(false);
         over.SetActive(false);
         scoreboard.SetActive(true);
+        timer.SetActive(false);
     }
 
 
