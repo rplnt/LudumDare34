@@ -14,7 +14,7 @@ public class SnakeHead : MonoBehaviour {
     bool gameOver = false;
 
     Mode mode;
-    int score = 0;
+    public int score { get; protected set; }
     int best = 0;
 
     public GameObject bodyParent;
@@ -53,7 +53,7 @@ public class SnakeHead : MonoBehaviour {
     float CalculateHeadPosition() {
         int height = Camera.main.pixelHeight;
 
-        return Camera.main.ScreenToWorldPoint(new Vector3(0, (float)height * 0.2f)).y;
+        return Camera.main.ScreenToWorldPoint(new Vector3(0, (float)height * 0.1f)).y;
     }
 
 
@@ -116,7 +116,7 @@ public class SnakeHead : MonoBehaviour {
 
         yield return new WaitForSeconds(0.1f);
         
-        if (paused && !gameOver) {
+        if (!Playing) {
             StartGame(mode);
         }
     }
@@ -257,6 +257,10 @@ public class SnakeHead : MonoBehaviour {
             collSpawnDelay = 0.3f / speed;
             rotationAmount += 3.5f;
 
+        } else {
+            speed += 0.025f;
+            collSpawnDelay = 0.3f / speed;
+            rotationAmount += 0.4f;
         }
     }
 

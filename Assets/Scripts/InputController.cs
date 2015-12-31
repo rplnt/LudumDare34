@@ -43,9 +43,14 @@ public class InputController : MonoBehaviour {
                 head.StartGame();
             }
 
+            if (cursor.activeSelf) {
+                cursor.SetActive(false);
+            }
+
         } else {
             /* game*/
 
+            bool posOK = true;
                 /* touch */
             if (Input.touchCount > 0) {
                 Touch touch = Input.GetTouch(0);
@@ -54,7 +59,8 @@ public class InputController : MonoBehaviour {
                 switch (touch.phase) {
                     case TouchPhase.Began:
                         cursor.SetActive(true);
-                        head.RotateTowards(pos);
+                        cursor.transform.position = new Vector2(pos.x, pos.y);
+                        //posOK = head.RotateTowards(pos);
                         break;
                     case TouchPhase.Moved:
                         if (cursor.activeSelf) {
@@ -69,7 +75,13 @@ public class InputController : MonoBehaviour {
                         break;
                 }
 
-                head.RotateTowards(pos);
+                posOK = head.RotateTowards(pos);
+
+                if (!posOK) {
+                    cursor.GetComponent<ParticleSystem>().startColor = Color.red;
+                } else {
+                    cursor.GetComponent<ParticleSystem>().startColor = Color.yellow;
+                }
 
                 /* mouse as touch */
             } else if (handleMouseAsTouch && Input.GetMouseButton(0)) {
@@ -83,8 +95,15 @@ public class InputController : MonoBehaviour {
                     cursor.transform.position = new Vector2(click.x, click.y);
                     cursor.SetActive(true);
                 }
-                
-                head.RotateTowards(click);
+
+                posOK = head.RotateTowards(click);
+
+                if (!posOK) {
+                    cursor.GetComponent<ParticleSystem>().startColor = Color.red;
+                } else {
+                    cursor.GetComponent<ParticleSystem>().startColor = Color.yellow;
+                }
+
             } else if (handleMouseAsTouch && Input.GetMouseButtonUp(0)) {
                 cursor.SetActive(false);
 
@@ -104,6 +123,7 @@ public class InputController : MonoBehaviour {
             if (Input.GetKeyDown(KeyCode.Escape)) {
                 head.Escape();
             }
+
         }
 
         /* common */
@@ -112,10 +132,8 @@ public class InputController : MonoBehaviour {
         }
 	}
 
-
     public void OpenTwitter() {
-#if UNITY_STANDALONE
-        Application.OpenURL("https://twitter.com/rplnt");
-#endif
+        Application.OpenURL("https://twitter.com/ozerogames");
     }
+
 }

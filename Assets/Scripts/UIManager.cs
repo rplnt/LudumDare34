@@ -68,7 +68,7 @@ public class UIManager : MonoBehaviour {
                     break;
 
                 case "Share":
-                    if (!(score > best) && (best != 0)) {
+                    if (!(score > best) || (score < 10)) {
                         activate = false;
                     }
                     break;

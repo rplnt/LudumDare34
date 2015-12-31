@@ -84,16 +84,16 @@ PlayerSettings:
     16:9: 0
     Others: 0
   bundleIdentifier: com.ozerogames.spacesnake
-  bundleVersion: 0.1
+  bundleVersion: 0.3
   preloadedAssets: []
   metroEnableIndependentInputSource: 0
   metroEnableLowLatencyPresentationAPI: 0
   xboxOneDisableKinectGpuReservation: 0
   virtualRealitySupported: 0
   productGUID: 7432d6c1f43a5194ca369e7215d6e694
-  AndroidBundleVersionCode: 1
+  AndroidBundleVersionCode: 3
   AndroidMinSdkVersion: 9
-  AndroidPreferredInstallLocation: 1
+  AndroidPreferredInstallLocation: 0
   aotOptions: 
   apiCompatibilityLevel: 2
   stripEngineCode: 1
@@ -140,7 +140,7 @@ PlayerSettings:
   androidSplashScreen: {fileID: 0}
   AndroidKeystoreName: 
   AndroidKeyaliasName: 
-  AndroidTVCompatibility: 1
+  AndroidTVCompatibility: 0
   AndroidIsGame: 1
   androidEnableBanner: 1
   m_AndroidBanners:
