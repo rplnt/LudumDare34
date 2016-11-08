@@ -4,10 +4,23 @@ using System.Collections;
 
 public class UIManager : MonoBehaviour {
 
+    string bannerProvider = "http://services.ozerogames.com/spacesnake/banner";
+
     public GameObject intro;
     public GameObject over;
     public GameObject scoreboard;
     public GameObject timer;
+
+    [System.Serializable]
+    class BannerData {
+        public int width;
+        public int height;
+        public string url;
+
+        public static BannerData CreateFromJSON(string jsonString) {
+            return JsonUtility.FromJson<BannerData>(jsonString);
+        }
+    }
 
     float timerValue;
 
@@ -25,11 +38,21 @@ public class UIManager : MonoBehaviour {
 
 
     public void ShowMenu() {
+        StartCoroutine(LoadBanner());
         DisableMenus();
         scoreboard.SetActive(false);
         intro.SetActive(true);
     }
 
+
+    IEnumerator LoadBanner() {
+        WWW response = new WWW(bannerProvider);
+        yield return response;
+        if (response.isDone && response.error == null) {
+        } else {
+            Debug.LogError("Could not contact banner server");
+        }
+    }
 
     public void ShowGameOver(int score, int best) {
         Text text = over.GetComponent<Text>();
