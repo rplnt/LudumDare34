@@ -5,6 +5,7 @@ using System.Collections;
 public class UIManager : MonoBehaviour {
 
     string bannerProvider = "http://services.ozerogames.com/spacesnake/banner";
+    string bannerTarget = null;
 
     public GameObject intro;
     public GameObject over;
@@ -13,9 +14,8 @@ public class UIManager : MonoBehaviour {
 
     [System.Serializable]
     class BannerData {
-        public int width;
-        public int height;
-        public string url;
+        public string banner = null;
+        public string target = null;
 
         public static BannerData CreateFromJSON(string jsonString) {
             return JsonUtility.FromJson<BannerData>(jsonString);
@@ -47,12 +47,42 @@ public class UIManager : MonoBehaviour {
 
     IEnumerator LoadBanner() {
         WWW response = new WWW(bannerProvider);
+        GameObject credits = intro.transform.Find("Credits").gameObject;
         yield return response;
         if (response.isDone && response.error == null) {
+            BannerData data = BannerData.CreateFromJSON(response.text);
+            bannerTarget = data.target;
+            if (data.banner != null) {
+                response = new WWW(data.banner);
+                yield return response;
+
+                if (response.isDone && response.error == null) {
+                    GameObject bannerGO = intro.transform.Find("Banner").gameObject;
+                    UnityEngine.UI.Image bannerImg = bannerGO.GetComponentInChildren<UnityEngine.UI.Image>();
+                    bannerImg.sprite = Sprite.Create(response.texture, new Rect(0.0f, 0.0f, response.texture.width, response.texture.height), Vector2.zero);
+                    credits.SetActive(false);
+                    bannerGO.SetActive(true);
+                } else {
+                    Debug.LogError("Could not load banner");
+                    credits.SetActive(true);
+                }
+            } else {
+                Debug.Log("Banner is disabled");
+                credits.SetActive(true);
+            }
         } else {
             Debug.LogError("Could not contact banner server");
+            credits.SetActive(true);
         }
     }
+
+
+    public void BannerClick() {
+        if (bannerTarget != null) {
+            Application.OpenURL(bannerTarget);
+        }
+    }
+
 
     public void ShowGameOver(int score, int best) {
         Text text = over.GetComponent<Text>();
