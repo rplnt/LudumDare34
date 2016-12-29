@@ -1,5 +1,6 @@
 ﻿using UnityEngine;
 using System.Collections;
+using UnityEngine.Analytics;
 
 /*
  * Credits: http://forum.unity3d.com/threads/creating-a-share-button-intent-for-android-in-unity-that-forces-the-chooser.335751/
@@ -18,6 +19,9 @@ public class AndroidShare : MonoBehaviour {
     public void shareBestScore() {
         //execute the below lines if being run on a Android device
 #if UNITY_ANDROID
+
+        Analytics.CustomEvent("AndroidShare");
+
         //Reference of AndroidJavaClass class for intent
         AndroidJavaClass intentClass = new AndroidJavaClass("android.content.Intent");
         //Reference of AndroidJavaObject class for intent

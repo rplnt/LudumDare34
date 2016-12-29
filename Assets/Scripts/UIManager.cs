@@ -5,27 +5,44 @@ using System.Collections;
 public class UIManager : MonoBehaviour {
 
     string bannerProvider = "http://services.ozerogames.com/spacesnake/banner";
+    string defaultTarget = "http://ozerogames.com/";
 
     public GameObject intro;
     public GameObject over;
     public GameObject scoreboard;
     public GameObject timer;
+    public AndroidStore store;
+
+    Text scoreText;
 
     [System.Serializable]
     class BannerData {
         public string banner = null;
-        public string target = null;
+        public bool clickable = false;
+        public string targetGoogle = null;
+        public string targetAmazon = null;
+        public string targetDefault = null;
 
         public static BannerData CreateFromJSON(string jsonString) {
             return JsonUtility.FromJson<BannerData>(jsonString);
         }
     }
 
+    public enum AndroidStore { Google, Amazon, None };
+
+
     float timerValue;
 
     void Awake() {
         //intro = GameObject.Find("Intro");
         //over = GameObject.Find("Game Over");
+    }
+
+    void Start() {
+         scoreText = scoreboard.GetComponent<Text>();
+         if (scoreText == null) {
+             Debug.LogError("Could not find TEXT on scoreboard");
+         }
     }
 
     public void DisableMenus() {
@@ -64,9 +81,29 @@ public class UIManager : MonoBehaviour {
                     UnityEngine.UI.Image bannerImg = bannerGO.GetComponentInChildren<UnityEngine.UI.Image>();
                     bannerImg.sprite = Sprite.Create(response.texture, new Rect(0.0f, 0.0f, response.texture.width, response.texture.height), Vector2.zero);
 
-                    if (data.target != null) {
+                    if (data.clickable) {
                         Button bannerButton = bannerGO.GetComponentInChildren<Button>();
-                        bannerButton.onClick.AddListener(() => { Application.OpenURL(data.target); });
+
+                        string target = null;
+
+                        if (store == AndroidStore.Google) {
+                            target = data.targetGoogle;
+                        } else if (store == AndroidStore.Amazon) {
+                            target = data.targetAmazon;
+                        } else if (store == AndroidStore.None) {
+                            target = data.targetDefault;
+                        } else {
+                            Debug.LogError("Unknown store!");
+                        }
+
+                        if (target != null) {
+                            Debug.Log(target);
+                            bannerButton.onClick.AddListener(() => { Application.OpenURL(target); });
+                        } else {
+                            Debug.Log("Using local target");
+                            bannerButton.onClick.AddListener(() => { Application.OpenURL(defaultTarget); });
+                        }
+
                     }
 
                     bannerGO.SetActive(true);
@@ -149,8 +186,7 @@ public class UIManager : MonoBehaviour {
 
 
     public void UpdateScore(int score) {
-        Text text = scoreboard.GetComponent<Text>();
-        text.text = "Score: " + score;
+        scoreText.text = "Score: " + score;
     }
 
 

@@ -15,11 +15,6 @@ public class Spawner : MonoBehaviour {
 
     public bool forceClean;
 
-    public Transform PICIKOKOTKURVA() {
-        return item.transform;
-    }
- 
-
 
     void Awake() {
         env = GameObject.Find("Environment");
@@ -76,18 +71,12 @@ public class Spawner : MonoBehaviour {
     IEnumerator EnableAfter(GameObject go, float delay) {
         yield return new WaitForSeconds(delay);
         go.SetActive(true);
-        //BoxCollider2D collider = go.GetComponent<BoxCollider2D>();
-        //collider.enabled = true;
     }
 
 
     IEnumerator RecycleAfter(GameObject go, float delay) {
         yield return new WaitForSeconds(delay);
-
         if (go == null) yield break;
-
-        //BoxCollider2D collider = go.GetComponent<BoxCollider2D>();
-        //collider.enabled = false;
 
         go.Recycle();
     }
@@ -106,8 +95,6 @@ public class Spawner : MonoBehaviour {
                 ps.Play();
             }
 
-            //BoxCollider2D collider = go.GetComponent<BoxCollider2D>();
-            //collider.enabled = false;
         }
 
         Invoke("CleanColliders", 2.0f);

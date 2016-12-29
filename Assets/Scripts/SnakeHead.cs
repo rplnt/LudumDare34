@@ -1,5 +1,7 @@
 ﻿using UnityEngine;
 using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.Analytics;
 
 public class SnakeHead : MonoBehaviour {
 
@@ -7,6 +9,8 @@ public class SnakeHead : MonoBehaviour {
     public float defaultSpeed;
     float speed;
     float rotationAmount;
+
+    float startTime;
 
     public float initialTrailTime;
 
@@ -90,6 +94,7 @@ public class SnakeHead : MonoBehaviour {
         best = PlayerPrefs.GetInt(ScoreKey);
         pb.StopPulser();
         collSpawnDelay = 0.4f / defaultSpeed;
+        startTime = Time.time;
     }
 
 
@@ -245,7 +250,7 @@ public class SnakeHead : MonoBehaviour {
 
 
     void Eat(GameObject edible) {
-        am.PlayToink();
+        am.PlayToink(edible.transform.position);
         edible.SetActive(false);
         StartCoroutine(ProlongTrail(0.5f, 1.0f));
         spawner.RespawnStar();
@@ -278,7 +283,15 @@ public class SnakeHead : MonoBehaviour {
         ui.ShowGameOver(score, best);
         if (score > best) {
             PlayerPrefs.SetInt(ScoreKey, score);
+            //StartCoroutine(PostHighScore(score));
         }
+
+        Analytics.CustomEvent("GameOver", new Dictionary<string, object>
+          {
+            {"Score", score},
+            {"Best", (score > best) },
+            {"Time", Time.time - startTime}
+          });
 
         am.PlayExplosion();
         am.paused = true;
@@ -299,6 +312,29 @@ public class SnakeHead : MonoBehaviour {
         }
 
         tr.time = initial + amount;
+    }
+
+    /* api */
+    [System.Serializable]
+    public class HighScore {
+        public string uuid;
+        public int score;
+
+        public HighScore(string _uuid, int _score) {
+            this.uuid = _uuid;
+            this.score = _score;
+        }
+    }
+
+
+    IEnumerator PostHighScore(int score) {
+        string highScore = JsonUtility.ToJson(new HighScore(SystemInfo.deviceUniqueIdentifier, score));
+        System.Collections.Generic.Dictionary<string, string> headers = new System.Collections.Generic.Dictionary<string,string>();
+        headers.Add("Content-Type", "application/json");
+        byte[] postData = System.Text.Encoding.ASCII.GetBytes(highScore.ToCharArray());
+
+        WWW www = new WWW("http://services.ozerogames.com/spacesnake/score", postData, headers);
+        yield return www;
     }
 
 }

@@ -7,6 +7,7 @@ public class InputController : MonoBehaviour {
     SnakeHead head;
 
     public GameObject cursor;
+    ParticleSystem ps;
 
     public bool handleMouseAsTouch;
 
@@ -21,6 +22,10 @@ public class InputController : MonoBehaviour {
 
     void Start() {
         cursor.SetActive(false);
+        ps = cursor.GetComponent<ParticleSystem>();
+        if (ps == null) {
+            Debug.LogError("Cursor is missing particle system");
+        }
     }
 
 
@@ -77,10 +82,11 @@ public class InputController : MonoBehaviour {
 
                 posOK = head.RotateTowards(pos);
 
+                var psMain = ps.main;
                 if (!posOK) {
-                    cursor.GetComponent<ParticleSystem>().startColor = Color.red;
+                    psMain.startColor = Color.red;
                 } else {
-                    cursor.GetComponent<ParticleSystem>().startColor = Color.yellow;
+                    psMain.startColor = Color.yellow;
                 }
 
                 /* mouse as touch */
@@ -97,11 +103,11 @@ public class InputController : MonoBehaviour {
                 }
 
                 posOK = head.RotateTowards(click);
-
+                var psMain = ps.main;
                 if (!posOK) {
-                    cursor.GetComponent<ParticleSystem>().startColor = Color.red;
+                    psMain.startColor = Color.red;
                 } else {
-                    cursor.GetComponent<ParticleSystem>().startColor = Color.yellow;
+                    psMain.startColor = Color.yellow;
                 }
 
             } else if (handleMouseAsTouch && Input.GetMouseButtonUp(0)) {

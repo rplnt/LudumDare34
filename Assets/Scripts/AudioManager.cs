@@ -37,13 +37,13 @@ public class AudioManager : MonoBehaviour {
     }
 
 
-    public void PlayToink() {
-        PlaySound(toink);
+    public void PlayToink(Vector2 pos) {
+        PlaySound(toink, pos.y / 50.0f);
     }
 
     public void PlayExplosion() {
         source.volume = 1.0f;
-        PlaySound(explosion);
+        PlaySound(explosion, Random.Range(-0.1f, 0.1f));
     }
 
     public void PlaySiren() {
@@ -54,7 +54,7 @@ public class AudioManager : MonoBehaviour {
         }
 
         if (sirenTimer > siren.length + 0.2f) {
-            PlaySound(siren, false);
+            PlaySound(siren, 0.0f);
             sirenTimer = 0.0f;
         }
     }
@@ -64,8 +64,8 @@ public class AudioManager : MonoBehaviour {
         sirenEnabled = false;
     }
 
-    void PlaySound(AudioClip sound, bool changePitch = true) {
-        source.pitch = 1.0f + (changePitch ? Random.Range(-0.1f, 0.1f) : 0.0f);
+    void PlaySound(AudioClip sound, float pitchOffset) {
+        source.pitch = 1.0f + pitchOffset; //(changePitch ? Random.Range(-0.1f, 0.1f) : 0.0f);
         source.PlayOneShot(sound);
     }
 
