@@ -32,8 +32,8 @@ public class AndroidShare : MonoBehaviour {
         intentObject.Call<AndroidJavaObject>("setType", "text/plain");
 
         //add data to be passed to the other activity i.e., the data to be sent
-        intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_SUBJECT"), "SpaceSnake - New Record! " + headScript.score + " points");
-        string shareText = "I just scored " + headScript.score + " points in SpaceSnake, can you beat me?\nGet SpaceSnake for Android here: " + url + "";
+        intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_SUBJECT"), "SpaceSnake - New Record! " + headScript.Score + " points");
+        string shareText = "I just scored " + headScript.Score + " points in SpaceSnake, can you beat me?\nGet SpaceSnake for Android here: " + url + "";
         intentObject.Call<AndroidJavaObject>("putExtra", intentClass.GetStatic<string>("EXTRA_TEXT"), shareText);
 
         //get the current activity

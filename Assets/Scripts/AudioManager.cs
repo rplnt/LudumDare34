@@ -42,7 +42,7 @@ public class AudioManager : MonoBehaviour {
     }
 
     public void PlayExplosion() {
-        source.volume = 1.0f;
+        source.volume = 0.8f;
         PlaySound(explosion, Random.Range(-0.1f, 0.1f));
     }
 

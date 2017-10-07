@@ -18,11 +18,14 @@ public class SnakeHead : MonoBehaviour {
     bool gameOver = false;
 
     Mode mode;
-    public int score { get; protected set; }
-    int best = 0;
+    public int Score { get; protected set; }
 
     public GameObject bodyParent;
     public GameObject global;
+
+    [Header("Leaderboard")]
+    public string dreamloUrl;
+    public string dreamloCode;
 
     Spawner spawner;
 
@@ -39,6 +42,8 @@ public class SnakeHead : MonoBehaviour {
     float collSpawnDelay;
     float lastSpawn = 0.0f;
 
+    string playerId;
+
 
     public enum Mode {
         CLASSIC, INSANE
@@ -51,6 +56,22 @@ public class SnakeHead : MonoBehaviour {
         ui = global.GetComponent<UIManager>();
         pb = Camera.main.gameObject.GetComponent<PulseBorders>();
         spawner = global.GetComponent<Spawner>();
+        playerId = SystemInfo.deviceUniqueIdentifier.Substring(0, Mathf.Min(16, SystemInfo.deviceUniqueIdentifier.Length));
+
+        BackupOldBestScore();
+    }
+
+
+    void BackupOldBestScore() {
+        int legacy_best = PlayerPrefs.GetInt("BEST_" + ScoreKey);
+        if (legacy_best == 0) return;
+        int sk_best = ScoreKeeper.BestScore(ScoreKey);
+        if (sk_best > 0) return;
+
+        ScoreKeeper.Record[] lastList, bestList;
+        ScoreKeeper.NewScore(ScoreKey, legacy_best, out lastList, out bestList);
+        StartCoroutine(PostHighScore(legacy_best, 0.0f));
+        Debug.Log("Loaded legacy record " + legacy_best + " into score keeper.");
     }
 
 
@@ -70,7 +91,7 @@ public class SnakeHead : MonoBehaviour {
 
     string ScoreKey {
         get {
-            return "BEST_" + System.Enum.GetName(typeof(Mode), mode);
+            return System.Enum.GetName(typeof(Mode), mode);
         }
     }
 
@@ -89,9 +110,9 @@ public class SnakeHead : MonoBehaviour {
         rotationAmount = defaultRotationAmount + (mode == Mode.INSANE ? 10.0f : 0.0f);
         ui.DisableMenus();        
         gameOver = false;
-        score = 0;
+        Score = 0;
         ui.UpdateScore(0);
-        best = PlayerPrefs.GetInt(ScoreKey);
+        //best = PlayerPrefs.GetInt(ScoreKey);
         pb.StopPulser();
         collSpawnDelay = 0.4f / defaultSpeed;
         startTime = Time.time;
@@ -254,8 +275,8 @@ public class SnakeHead : MonoBehaviour {
         edible.SetActive(false);
         StartCoroutine(ProlongTrail(0.5f, 1.0f));
         spawner.RespawnStar();
-        score++;
-        ui.UpdateScore(score);
+        Score++;
+        ui.UpdateScore(Score);
 
         if (mode == Mode.INSANE) {
             speed += 0.25f;
@@ -280,17 +301,23 @@ public class SnakeHead : MonoBehaviour {
             ss.CameraShake();
         }
 
-        ui.ShowGameOver(score, best);
-        if (score > best) {
-            PlayerPrefs.SetInt(ScoreKey, score);
-            //StartCoroutine(PostHighScore(score));
-        }
+        ScoreKeeper.Record[] lastList, topList;
+        int recordIndex = ScoreKeeper.NewScore(ScoreKey, Score, out lastList, out topList);
 
+        IEnumerator finalScreen = recordIndex >= 0 || (topList[topList.Length - 1] == null || topList[topList.Length - 1].score == 0) ? 
+                                  ui.ShowHighScoreList(topList, recordIndex) : 
+                                  ui.ShowLastScoreGraph(lastList, topList[0].score);
+        ui.ShowFinalScreen(finalScreen);
+
+        if (mode == Mode.CLASSIC && recordIndex == 0) {
+            StartCoroutine(PostHighScore(Score, Time.time - startTime));
+        }
         Analytics.CustomEvent("GameOver", new Dictionary<string, object>
           {
-            {"Score", score},
-            {"Best", (score > best) },
-            {"Time", Time.time - startTime}
+            {"Score", Score},
+            {"Best", (recordIndex >= 0) },
+            {"Time", Time.time - startTime},
+            {"GameNumber", ScoreKeeper.GetGameCount(ScoreKey) }
           });
 
         am.PlayExplosion();
@@ -314,27 +341,19 @@ public class SnakeHead : MonoBehaviour {
         tr.time = initial + amount;
     }
 
-    /* api */
-    [System.Serializable]
-    public class HighScore {
-        public string uuid;
-        public int score;
 
-        public HighScore(string _uuid, int _score) {
-            this.uuid = _uuid;
-            this.score = _score;
+    IEnumerator PostHighScore(int score, float elapsedTime) {
+        
+        WWW response = new WWW(string.Format("{0}/{1}/add/{2}/{3}/{4}", dreamloUrl, dreamloCode, WWW.EscapeURL(playerId), score, Mathf.RoundToInt(elapsedTime)));
+        yield return response;
+
+        if (response.isDone && response.error == null) {
+            Debug.Log("Posted best score");
+        } else {
+            Debug.LogError("Failed to post best score of " + score);
         }
-    }
 
-
-    IEnumerator PostHighScore(int score) {
-        string highScore = JsonUtility.ToJson(new HighScore(SystemInfo.deviceUniqueIdentifier, score));
-        System.Collections.Generic.Dictionary<string, string> headers = new System.Collections.Generic.Dictionary<string,string>();
-        headers.Add("Content-Type", "application/json");
-        byte[] postData = System.Text.Encoding.ASCII.GetBytes(highScore.ToCharArray());
-
-        WWW www = new WWW("http://services.ozerogames.com/spacesnake/score", postData, headers);
-        yield return www;
+        yield return null;
     }
 
 }

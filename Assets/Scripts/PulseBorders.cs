@@ -43,11 +43,11 @@ public class PulseBorders : MonoBehaviour {
             return;
         }
 
-        if (up && so.intensity < 1.4f) {
+        if (up && so.intensity < 1.666f) {
             so.intensity += diff * Time.deltaTime * (so.intensity < 0.8f ? 2.5f : 1.0f);
         } else if (up) {
             up = false;
-        } else if (!up && so.intensity > 0.8f) {
+        } else if (!up && so.intensity > 0.85f) {
             so.intensity -= diff * Time.deltaTime;
         } else { //!up
             up = true;
